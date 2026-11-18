@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mindora.domain.model.SmartPriorityLabel
 import com.example.mindora.ui.theme.AppSurface
 import com.example.mindora.ui.theme.ErrorRed
 import com.example.mindora.ui.theme.PrimaryPurple

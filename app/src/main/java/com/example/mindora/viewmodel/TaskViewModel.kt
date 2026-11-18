@@ -8,6 +8,8 @@ import com.example.mindora.data.entity.Task
 import com.example.mindora.data.entity.TaskWithSubject
 import com.example.mindora.data.repository.SubjectRepository
 import com.example.mindora.data.repository.TaskRepository
+import com.example.mindora.domain.model.SmartPriorityLabel
+import com.example.mindora.domain.usecase.CalculateSmartPriority
 import com.example.mindora.notification.ReminderHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,6 +60,9 @@ class TaskViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    fun priorityFor(isCompleted: Boolean, deadlineMillis: Long, priority: String): SmartPriorityLabel =
+        CalculateSmartPriority.invoke(isCompleted, deadlineMillis, priority)
 
     fun setFilter(filter: TaskFilter) {
         _selectedFilter.value = filter

@@ -4,6 +4,7 @@ import com.example.mindora.data.dao.TaskDao
 import com.example.mindora.data.entity.Task
 import com.example.mindora.data.entity.TaskWithSubject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class TaskRepository(
     private val taskDao: TaskDao,
@@ -11,6 +12,9 @@ class TaskRepository(
 ) {
 
     val allTasksWithSubject: Flow<List<TaskWithSubject>> = taskDao.getAllTasksWithSubject()
+
+    suspend fun allTasksWithSubjectSnapshot(): List<TaskWithSubject> =
+        allTasksWithSubject.first()
 
     val totalTaskCount: Flow<Int> = taskDao.getTotalTaskCount()
 

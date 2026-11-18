@@ -3,7 +3,7 @@ package com.example.mindora.data.repository
 import com.example.mindora.data.dao.StudyActivityDao
 import com.example.mindora.data.entity.StudyActivity
 import com.example.mindora.data.entity.StudyMilestone
-import com.example.mindora.data.streak.StudyStreakCalculator
+import com.example.mindora.domain.usecase.StudyStreakCalculator
 import kotlinx.coroutines.flow.Flow
 import java.util.TimeZone
 import java.util.UUID

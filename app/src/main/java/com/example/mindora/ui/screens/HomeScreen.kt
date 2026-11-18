@@ -72,7 +72,7 @@ import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextMuted
 import com.example.mindora.ui.theme.TextSecondary
 import com.example.mindora.viewmodel.HomeViewModel
-import com.example.mindora.viewmodel.PriorityUtils
+
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -299,7 +299,7 @@ fun HomeScreen(
                         subjectColorHex = entry.subject?.color ?: "#7965E8",
                         taskType = entry.task.type,
                         deadlineDate = deadline,
-                        priorityLabel = PriorityUtils.calculateSmartPriority(entry.task),
+                        priorityLabel = viewModel.priorityFor(entry.task.isCompleted, entry.task.deadline, entry.task.priority),
                         isCompleted = entry.task.isCompleted,
                         onToggleCompleted = { completed ->
                             viewModel.toggleTaskCompletion(entry.task.id, completed)
@@ -333,7 +333,7 @@ fun HomeScreen(
                         subjectColorHex = entry.subject?.color ?: "#7965E8",
                         taskType = entry.task.type,
                         deadlineDate = deadline,
-                        priorityLabel = PriorityUtils.calculateSmartPriority(entry.task),
+                        priorityLabel = viewModel.priorityFor(entry.task.isCompleted, entry.task.deadline, entry.task.priority),
                         isCompleted = entry.task.isCompleted,
                         onToggleCompleted = { completed ->
                             viewModel.toggleTaskCompletion(entry.task.id, completed)

@@ -1,6 +1,6 @@
 package com.example.mindora
 
-import com.example.mindora.data.streak.StudyStreakCalculator
+import com.example.mindora.domain.usecase.StudyStreakCalculator
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.Calendar

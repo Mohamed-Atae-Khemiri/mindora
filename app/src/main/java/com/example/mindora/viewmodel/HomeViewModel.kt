@@ -10,7 +10,8 @@ import com.example.mindora.data.repository.StudentProfileRepository
 import com.example.mindora.data.repository.StudyActivityRepository
 import com.example.mindora.data.repository.SubjectRepository
 import com.example.mindora.data.repository.TaskRepository
-import com.example.mindora.ui.components.SmartPriorityLabel
+import com.example.mindora.domain.model.SmartPriorityLabel
+import com.example.mindora.domain.usecase.CalculateSmartPriority
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,10 +57,10 @@ class HomeViewModel(
         val totalTasks = tasks.size
         val completed = tasks.count { it.task.isCompleted }
         val urgent = tasks.filter {
-            !it.task.isCompleted && PriorityUtils.calculateSmartPriority(it.task) == SmartPriorityLabel.URGENT
+            !it.task.isCompleted && CalculateSmartPriority.invoke(it.task.isCompleted, it.task.deadline, it.task.priority) == SmartPriorityLabel.URGENT
         }
         val upcoming = tasks.filter {
-            !it.task.isCompleted && PriorityUtils.calculateSmartPriority(it.task) == SmartPriorityLabel.UPCOMING
+            !it.task.isCompleted && CalculateSmartPriority.invoke(it.task.isCompleted, it.task.deadline, it.task.priority) == SmartPriorityLabel.UPCOMING
         }
         HomeDashboardState(
             subjectsCount = subjects.size,
@@ -82,6 +83,9 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeDashboardState()
     )
+
+    fun priorityFor(isCompleted: Boolean, deadlineMillis: Long, priority: String): SmartPriorityLabel =
+        CalculateSmartPriority.invoke(isCompleted, deadlineMillis, priority)
 
     suspend fun markMilestoneCelebrated(id: Long) {
         studyActivityRepository.markMilestoneCelebrated(id)

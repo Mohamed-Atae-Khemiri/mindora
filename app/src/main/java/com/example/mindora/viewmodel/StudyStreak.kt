@@ -1,6 +1,6 @@
 package com.example.mindora.viewmodel
 
-import com.example.mindora.data.streak.StudyStreakCalculator
+import com.example.mindora.domain.usecase.StudyStreakCalculator
 
 data class StudyStreakState(
     val currentDays: Int = 0,

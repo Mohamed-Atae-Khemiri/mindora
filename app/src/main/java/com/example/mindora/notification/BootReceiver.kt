@@ -4,9 +4,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.mindora.data.database.MindoraDatabase
+import com.example.mindora.data.repository.StudyActivityRepository
+import com.example.mindora.data.repository.TaskRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
@@ -14,7 +15,9 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == "android.intent.action.QUICKBOOT_POWERON") {
             CoroutineScope(Dispatchers.IO).launch {
                 val db = MindoraDatabase.getDatabase(context)
-                val tasksWithSubject = db.taskDao().getAllTasksWithSubject().first()
+                val studyActivityRepository = StudyActivityRepository(db.studyActivityDao())
+                val taskRepository = TaskRepository(db.taskDao(), studyActivityRepository)
+                val tasksWithSubject = taskRepository.allTasksWithSubjectSnapshot()
                 val currentTime = System.currentTimeMillis()
 
                 for (item in tasksWithSubject) {

@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mindora.domain.model.SmartPriorityLabel
 import com.example.mindora.ui.theme.ErrorRed
 import com.example.mindora.ui.theme.ErrorRedLight
 import com.example.mindora.ui.theme.PrimaryPurple
@@ -20,13 +21,6 @@ import com.example.mindora.ui.theme.SuccessGreen
 import com.example.mindora.ui.theme.SuccessGreenLight
 import com.example.mindora.ui.theme.WarningOrange
 import com.example.mindora.ui.theme.WarningOrangeLight
-
-enum class SmartPriorityLabel(val displayName: String) {
-    URGENT("Urgent"),
-    UPCOMING("Upcoming"),
-    LOW_PRIORITY("Low priority"),
-    COMPLETED("Completed")
-}
 
 @Composable
 private fun SmartPriorityLabel.containerColor(): Color = when (this) {

@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.example.mindora.data.database.MindoraDatabase
+import com.example.mindora.data.repository.StudyActivityRepository
+import com.example.mindora.data.repository.TaskRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +19,9 @@ class ReminderReceiver : BroadcastReceiver() {
             // Mark task as completed in Room database
             CoroutineScope(Dispatchers.IO).launch {
                 val db = MindoraDatabase.getDatabase(context)
-                db.taskDao().updateTaskCompletion(taskId, true)
+                val studyActivityRepository = StudyActivityRepository(db.studyActivityDao())
+                val taskRepository = TaskRepository(db.taskDao(), studyActivityRepository)
+                taskRepository.updateTaskCompletion(taskId, true)
                 ReminderHelper.cancelReminder(context, taskId)
             }
         } else {

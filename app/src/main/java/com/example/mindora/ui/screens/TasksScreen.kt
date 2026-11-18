@@ -72,7 +72,7 @@ import com.example.mindora.ui.theme.RichViolet
 import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextSecondary
-import com.example.mindora.viewmodel.PriorityUtils
+
 import com.example.mindora.viewmodel.TaskFilter
 import com.example.mindora.viewmodel.TaskViewModel
 import java.text.SimpleDateFormat
@@ -247,7 +247,7 @@ fun TasksScreen(viewModel: TaskViewModel) {
                     subjectColorHex = item.subject?.color ?: "#7965E8",
                     taskType = item.task.type,
                     deadlineDate = deadline,
-                    priorityLabel = PriorityUtils.calculateSmartPriority(item.task),
+                    priorityLabel = viewModel.priorityFor(item.task.isCompleted, item.task.deadline, item.task.priority),
                     isCompleted = item.task.isCompleted,
                     onToggleCompleted = { viewModel.toggleTaskCompletion(item.task.id, it) },
                     onEditClick = { taskToEdit = item },

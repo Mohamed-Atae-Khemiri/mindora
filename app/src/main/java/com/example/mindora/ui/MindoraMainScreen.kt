@@ -18,9 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.example.mindora.navigation.BottomNavigationBar
-import com.example.mindora.navigation.MindoraAppNavHost
-import com.example.mindora.navigation.MindoraNavigationRail
+import com.example.mindora.ui.navigation.BottomNavigationBar
+import com.example.mindora.ui.navigation.MindoraAppNavHost
+import com.example.mindora.ui.navigation.MindoraNavigationRail
 import com.example.mindora.ui.theme.MindoraTheme
 import com.example.mindora.ui.theme.SoftCream
 import com.example.mindora.viewmodel.HomeViewModel
