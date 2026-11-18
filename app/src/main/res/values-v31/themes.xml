@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Mindora" parent="Base.Theme.Mindora">
+        <item name="android:windowSplashScreenBackground">@color/mindy_splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/panda_study</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#A98DFF</item>
+    </style>
+</resources>
