@@ -53,14 +53,13 @@ fun MindoraPage(
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = SoftCream,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         floatingActionButton = { floatingActionButton?.invoke() }
     ) { insets ->
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(insets)
-                .background(SoftCream),
+                .padding(insets),
             contentAlignment = Alignment.TopCenter
         ) {
             val horizontalGutter = if (maxWidth >= 840.dp) 40.dp else 24.dp

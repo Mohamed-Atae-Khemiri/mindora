@@ -52,7 +52,7 @@ fun BottomNavigationBar(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SoftCream)
+            .background(Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Surface(

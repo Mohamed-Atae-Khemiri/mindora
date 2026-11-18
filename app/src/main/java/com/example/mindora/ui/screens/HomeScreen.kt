@@ -110,7 +110,7 @@ fun HomeScreen(
     val date = SimpleDateFormat("EEEE · d MMMM", Locale.getDefault()).format(Date())
 
     Scaffold(
-        containerColor = StudioPaper,
+        containerColor = Color.Transparent,
         snackbarHost = {
             SnackbarHost(snackbarHostState) { snackbarData ->
                 Snackbar {

@@ -12,11 +12,12 @@ import com.example.mindora.ui.screens.ProgressScreen
 import com.example.mindora.ui.screens.SettingsScreen
 import com.example.mindora.ui.screens.SubjectsScreen
 import com.example.mindora.ui.screens.TasksScreen
+import com.example.mindora.ui.theme.BackgroundMode
 import com.example.mindora.viewmodel.HomeViewModel
 import com.example.mindora.viewmodel.ProgressViewModel
+import com.example.mindora.viewmodel.StudentProfileViewModel
 import com.example.mindora.viewmodel.SubjectViewModel
 import com.example.mindora.viewmodel.TaskViewModel
-import com.example.mindora.viewmodel.StudentProfileViewModel
 
 @Composable
 fun MindoraAppNavHost(
@@ -29,6 +30,14 @@ fun MindoraAppNavHost(
     localAiViewModel: LocalAiViewModel,
     isDarkMode: Boolean,
     onDarkModeChange: (Boolean) -> Unit,
+    backgroundMode: BackgroundMode,
+    onBackgroundModeChange: (BackgroundMode) -> Unit,
+    selectedPresetId: String,
+    onPresetIdChange: (String) -> Unit,
+    customPhotoUri: String?,
+    onCustomPhotoUriChange: (String?) -> Unit,
+    dimLevel: Float,
+    onDimLevelChange: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -59,6 +68,14 @@ fun MindoraAppNavHost(
             SettingsScreen(
                 isDarkMode = isDarkMode,
                 onDarkModeChange = onDarkModeChange,
+                backgroundMode = backgroundMode,
+                onBackgroundModeChange = onBackgroundModeChange,
+                selectedPresetId = selectedPresetId,
+                onPresetIdChange = onPresetIdChange,
+                customPhotoUri = customPhotoUri,
+                onCustomPhotoUriChange = onCustomPhotoUriChange,
+                dimLevel = dimLevel,
+                onDimLevelChange = onDimLevelChange,
                 viewModel = studentProfileViewModel
             )
         }

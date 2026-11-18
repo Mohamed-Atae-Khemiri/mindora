@@ -6,28 +6,35 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -35,50 +42,70 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import com.example.mindora.data.entity.StudentProfile
-import com.example.mindora.ui.components.PandaMood
-import com.example.mindora.ui.components.PandaStudyMascot
 import com.example.mindora.ui.components.MindoraFeatureShape
 import com.example.mindora.ui.components.MindoraPage
 import com.example.mindora.ui.components.MindoraSectionHeading
 import com.example.mindora.ui.components.MindoraSurfaceShape
+import com.example.mindora.ui.components.PandaMood
+import com.example.mindora.ui.components.PandaStudyMascot
 import com.example.mindora.ui.components.StudentAvatar
+import com.example.mindora.ui.theme.AppBackgroundPresets
 import com.example.mindora.ui.theme.AppSurface
+import com.example.mindora.ui.theme.BackgroundMode
+import com.example.mindora.ui.theme.BackgroundPreset
 import com.example.mindora.ui.theme.CoralAccent
 import com.example.mindora.ui.theme.DeepMidnightPurple
 import com.example.mindora.ui.theme.ElectricLavender
 import com.example.mindora.ui.theme.LimeAccent
+import com.example.mindora.ui.theme.PatternCategory
+import com.example.mindora.ui.theme.RichViolet
+import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextPrimary
+import com.example.mindora.ui.theme.TextMuted
 import com.example.mindora.ui.theme.TextSecondary
+import com.example.mindora.ui.theme.patternCraftBackground
 import com.example.mindora.viewmodel.StudentProfileViewModel
+import kotlin.math.abs
 
 private val academicYears = listOf("Year 1", "Year 2", "Year 3", "Year 4", "Year 5+", "Graduate")
 
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     isDarkMode: Boolean,
     onDarkModeChange: (Boolean) -> Unit,
+    backgroundMode: BackgroundMode,
+    onBackgroundModeChange: (BackgroundMode) -> Unit,
+    selectedPresetId: String,
+    onPresetIdChange: (String) -> Unit,
+    customPhotoUri: String?,
+    onCustomPhotoUriChange: (String?) -> Unit,
+    dimLevel: Float,
+    onDimLevelChange: (Float) -> Unit,
     viewModel: StudentProfileViewModel
 ) {
     val context = LocalContext.current
@@ -96,6 +123,7 @@ fun SettingsScreen(
     var avatarUri by rememberSaveable { mutableStateOf<String?>(null) }
     var avatarPickerError by rememberSaveable { mutableStateOf<String?>(null) }
     var yearMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    var selectedPatternCategory by rememberSaveable { mutableStateOf(PatternCategory.ALL) }
 
     LaunchedEffect(profile) {
         fullName = profile?.fullName.orEmpty()
@@ -136,223 +164,208 @@ fun SettingsScreen(
     MindoraPage(
         eyebrow = "Your profile",
         title = if (profile == null) "Make it yours." else "Your space.",
-        description = "Set up your student identity and the way Mindora feels."
+        description = "Set up your student identity, background theme, and appearance."
     ) {
         if (profile == null || isEditing) {
-        item(key = "profile-identity") {
-            Column(
-                Modifier.fillMaxWidth()
-                    .clip(MindoraFeatureShape)
-                    .background(DeepMidnightPurple)
-                    .padding(20.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    StudentAvatar(profile, size = 76.dp, avatarUriOverride = avatarUri)
-                    Spacer(Modifier.width(16.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            if (fullName.isBlank()) "YOUR STUDY ID" else fullName.uppercase(),
-                            color = ElectricLavender,
-                            fontSize = 10.sp,
-                            letterSpacing = 1.5.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            if (profile == null) "Start with your name." else "A little more you.",
-                            color = Color.White,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 22.sp,
-                            lineHeight = 27.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Button(
-                        onClick = { imagePicker.launch(arrayOf("image/*")) },
-                        modifier = Modifier.height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = ElectricLavender,
-                            contentColor = DeepMidnightPurple
-                        )
-                    ) {
-                        Icon(Icons.Default.PhotoCamera, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Choose a photo", fontWeight = FontWeight.SemiBold)
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    PandaStudyMascot(size = 50.dp, mood = PandaMood.STUDYING)
-                    Text("Panda Study is here to cheer you on.", color = Color.White.copy(alpha = .8f), fontSize = 11.sp)
-                }
-                if (avatarUri != null) {
-                    TextButton(
-                        onClick = {
-                            avatarUri = null
-                            avatarPickerError = null
-                        },
-                        modifier = Modifier.height(48.dp)
-                    ) {
-                        Text("Remove photo", color = Color.White)
-                    }
-                }
-                avatarPickerError?.let { error ->
-                    Text(error, color = CoralAccent, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
-                }
-            }
-        }
-
-        item(key = "identity-heading") {
-            MindoraSectionHeading("A little about you", "Your name and email are required.")
-        }
-        item(key = "identity-fields") {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileField(
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    label = "Full name",
-                    error = saveState.errors.fullName,
-                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ProfileField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = "Email address",
-                    error = saveState.errors.email,
-                    keyboardType = KeyboardType.Email,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ProfileField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = "Phone (optional)",
-                    error = saveState.errors.phoneNumber,
-                    keyboardType = KeyboardType.Phone,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ProfileField(
-                    value = age,
-                    onValueChange = { age = it.filter(Char::isDigit).take(3) },
-                    label = "Age (optional)",
-                    error = saveState.errors.age,
-                    keyboardType = KeyboardType.Number,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-
-        item(key = "campus-heading") {
-            MindoraSectionHeading("Your campus", "A few details help personalize your study space.")
-        }
-        item(key = "campus-fields") {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ProfileField(
-                    value = university,
-                    onValueChange = { university = it },
-                    label = "University",
-                    error = saveState.errors.university,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ProfileField(
-                    value = fieldOfStudy,
-                    onValueChange = { fieldOfStudy = it },
-                    label = "Field of study",
-                    error = saveState.errors.fieldOfStudy,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ExposedDropdownMenuBox(
-                    expanded = yearMenuExpanded,
-                    onExpandedChange = { yearMenuExpanded = !yearMenuExpanded }
+            item(key = "profile-identity") {
+                Column(
+                    Modifier.fillMaxWidth()
+                        .clip(MindoraFeatureShape)
+                        .background(DeepMidnightPurple)
+                        .padding(20.dp)
                 ) {
-                    OutlinedTextField(
-                        value = academicYear,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Academic year") },
-                        isError = saveState.errors.academicYear != null,
-                        supportingText = saveState.errors.academicYear?.let { error -> { Text(error) } },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yearMenuExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        singleLine = true
-                    )
-                    ExposedDropdownMenu(
-                        expanded = yearMenuExpanded,
-                        onDismissRequest = { yearMenuExpanded = false }
-                    ) {
-                        academicYears.forEach { year ->
-                            DropdownMenuItem(
-                                text = { Text(year) },
-                                onClick = {
-                                    academicYear = year
-                                    yearMenuExpanded = false
-                                }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        StudentAvatar(profile, size = 76.dp, avatarUriOverride = avatarUri)
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                if (fullName.isBlank()) "YOUR STUDY ID" else fullName.uppercase(),
+                                color = ElectricLavender,
+                                fontSize = 10.sp,
+                                letterSpacing = 1.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                if (profile == null) "Start with your name." else "A little more you.",
+                                color = Color.White,
+                                fontFamily = FontFamily.Serif,
+                                fontSize = 22.sp,
+                                lineHeight = 27.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
+                    Spacer(Modifier.height(16.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Button(
+                            onClick = { imagePicker.launch(arrayOf("image/*")) },
+                            modifier = Modifier.height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ElectricLavender,
+                                contentColor = DeepMidnightPurple
+                            )
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Choose a photo", fontWeight = FontWeight.SemiBold)
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        PandaStudyMascot(size = 50.dp, mood = PandaMood.STUDYING)
+                        Text("Panda Study is here to cheer you on.", color = Color.White.copy(alpha = .8f), fontSize = 11.sp)
+                    }
+                    if (avatarUri != null) {
+                        TextButton(
+                            onClick = {
+                                avatarUri = null
+                                avatarPickerError = null
+                            },
+                            modifier = Modifier.height(48.dp)
+                        ) {
+                            Text("Remove photo", color = Color.White)
+                        }
+                    }
+                    avatarPickerError?.let { error ->
+                        Text(error, color = CoralAccent, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
-                ProfileField(
-                    value = classGroup,
-                    onValueChange = { classGroup = it },
-                    label = "Class / group (optional)",
-                    error = null,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
-        }
-        item(key = "profile-save") {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = {
-                        viewModel.save(
-                            fullName = fullName,
-                            email = email,
-                            phoneNumber = phone,
-                            university = university,
-                            fieldOfStudy = fieldOfStudy,
-                            academicYear = academicYear,
-                            avatarUri = avatarUri,
-                            age = age,
-                            classGroup = classGroup
-                        )
-                    },
-                    enabled = !saveState.isSaving,
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DeepMidnightPurple),
-                    shape = MindoraSurfaceShape
-                ) {
-                    Text(
-                        when {
-                            saveState.isSaving -> "Saving profile..."
-                            profile == null -> "Save my profile"
-                            else -> "Save changes"
-                        },
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+
+            item(key = "identity-heading") {
+                MindoraSectionHeading("A little about you", "Your name and email are required.")
+            }
+            item(key = "identity-fields") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ProfileField(
+                        value = fullName,
+                        onValueChange = { fullName = it },
+                        label = "Full name",
+                        error = saveState.errors.fullName,
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ProfileField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = "Email address",
+                        error = saveState.errors.email,
+                        keyboardType = KeyboardType.Email,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ProfileField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = "Phone (optional)",
+                        error = saveState.errors.phoneNumber,
+                        keyboardType = KeyboardType.Phone,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ProfileField(
+                        value = age,
+                        onValueChange = { age = it.filter(Char::isDigit).take(3) },
+                        label = "Age (optional)",
+                        error = saveState.errors.age,
+                        keyboardType = KeyboardType.Number,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-                if (saveState.saved) {
-                    Text("Your student profile is saved on this device.", color = TextSecondary, fontSize = 13.sp)
+            }
+
+            item(key = "campus-heading") {
+                MindoraSectionHeading("Your campus", "A few details help personalize your study space.")
+            }
+            item(key = "campus-fields") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ProfileField(
+                        value = university,
+                        onValueChange = { university = it },
+                        label = "University",
+                        error = saveState.errors.university,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ProfileField(
+                        value = fieldOfStudy,
+                        onValueChange = { fieldOfStudy = it },
+                        label = "Field of study",
+                        error = saveState.errors.fieldOfStudy,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ExposedDropdownMenuBox(
+                        expanded = yearMenuExpanded,
+                        onExpandedChange = { yearMenuExpanded = !yearMenuExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = academicYear,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Academic year") },
+                            isError = saveState.errors.academicYear != null,
+                            supportingText = saveState.errors.academicYear?.let { error -> { Text(error) } },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yearMenuExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            singleLine = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = yearMenuExpanded,
+                            onDismissRequest = { yearMenuExpanded = false }
+                        ) {
+                            academicYears.forEach { year ->
+                                DropdownMenuItem(
+                                    text = { Text(year) },
+                                    onClick = {
+                                        academicYear = year
+                                        yearMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    ProfileField(
+                        value = classGroup,
+                        onValueChange = { classGroup = it },
+                        label = "Class / group (optional)",
+                        error = null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-                saveState.saveError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 13.sp) }
             }
-        }
-        item(key = "local-profile-note") {
-            Row(
-                Modifier.fillMaxWidth().clip(MindoraSurfaceShape).background(AppSurface).padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PandaStudyMascot(size = 42.dp, mood = PandaMood.ENCOURAGING, animate = false)
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    "Profile details stay on this device. Mindora has no sign-in provider configured, so this email is not an authenticated account.",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp
-                )
+            item(key = "profile-save") {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            viewModel.save(
+                                fullName = fullName,
+                                email = email,
+                                phoneNumber = phone,
+                                university = university,
+                                fieldOfStudy = fieldOfStudy,
+                                academicYear = academicYear,
+                                avatarUri = avatarUri,
+                                age = age,
+                                classGroup = classGroup
+                            )
+                        },
+                        enabled = !saveState.isSaving,
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = DeepMidnightPurple),
+                        shape = MindoraSurfaceShape
+                    ) {
+                        Text(
+                            when {
+                                saveState.isSaving -> "Saving profile..."
+                                profile == null -> "Save my profile"
+                                else -> "Save changes"
+                            },
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    if (saveState.saved) {
+                        Text("Your student profile is saved on this device.", color = TextSecondary, fontSize = 13.sp)
+                    }
+                    saveState.saveError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 13.sp) }
+                }
             }
-        }
         } else {
             item(key = "profile-summary") {
                 ProfileSummary(
@@ -365,6 +378,211 @@ fun SettingsScreen(
                 )
             }
         }
+
+        item(key = "background-heading") {
+            MindoraSectionHeading("App Background & Themes", "Customize Mindora with built-in color themes or your own photos.")
+        }
+
+        item(key = "background-controls") {
+            Column(
+                Modifier.fillMaxWidth()
+                    .clip(MindoraFeatureShape)
+                    .background(AppSurface)
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Mode Selector: Presets vs Custom Photo
+                Row(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(SurfaceBorder).padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Button(
+                        onClick = { onBackgroundModeChange(BackgroundMode.PRESET) },
+                        modifier = Modifier.weight(1f).height(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (backgroundMode == BackgroundMode.PRESET) DeepMidnightPurple else Color.Transparent,
+                            contentColor = if (backgroundMode == BackgroundMode.PRESET) Color.White else TextPrimary
+                        ),
+                        elevation = null,
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.Palette, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Color Themes", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    Button(
+                        onClick = { onBackgroundModeChange(BackgroundMode.CUSTOM_PHOTO) },
+                        modifier = Modifier.weight(1f).height(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (backgroundMode == BackgroundMode.CUSTOM_PHOTO) DeepMidnightPurple else Color.Transparent,
+                            contentColor = if (backgroundMode == BackgroundMode.CUSTOM_PHOTO) Color.White else TextPrimary
+                        ),
+                        elevation = null,
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Custom Photo", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                if (backgroundMode == BackgroundMode.PRESET) {
+                    Text(
+                        "CHOOSE A PATTERN-CRAFT THEME",
+                        color = TextMuted,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+
+                    // Category Filter Tabs
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(PatternCategory.entries, key = { it.name }) { category ->
+                            val isCatSelected = selectedPatternCategory == category
+                            Surface(
+                                onClick = { selectedPatternCategory = category },
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isCatSelected) DeepMidnightPurple else SurfaceBorder,
+                                contentColor = if (isCatSelected) Color.White else TextPrimary
+                            ) {
+                                Text(
+                                    text = category.label,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    val filteredPresets = remember(selectedPatternCategory) {
+                        if (selectedPatternCategory == PatternCategory.ALL) {
+                            AppBackgroundPresets
+                        } else {
+                            AppBackgroundPresets.filter { it.category == selectedPatternCategory }
+                        }
+                    }
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredPresets, key = BackgroundPreset::id) { preset ->
+                            val isSelected = selectedPresetId == preset.id
+                            Surface(
+                                onClick = { onPresetIdChange(preset.id) },
+                                shape = RoundedCornerShape(16.dp),
+                                color = Color.Transparent,
+                                border = BorderStroke(
+                                    if (isSelected) 3.dp else 1.dp,
+                                    if (isSelected) RichViolet else SurfaceBorder
+                                ),
+                                modifier = Modifier.size(width = 118.dp, height = 118.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .patternCraftBackground(preset)
+                                        .padding(6.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(
+                                                if (preset.isDark) Color(0x99000000) else Color(0xB3FFFFFF)
+                                            )
+                                            .padding(horizontal = 6.dp, vertical = 6.dp)
+                                    ) {
+                                        if (isSelected) {
+                                            Icon(
+                                                Icons.Default.CheckCircle,
+                                                contentDescription = null,
+                                                tint = RichViolet,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(Modifier.height(3.dp))
+                                        }
+                                        Text(
+                                            preset.name,
+                                            color = if (preset.isDark) Color.White else DeepMidnightPurple,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 2
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Custom Photo Selector
+                    val photoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                        uri?.let { selected ->
+                            runCatching {
+                                context.contentResolver.takePersistableUriPermission(
+                                    selected,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                )
+                            }
+                            onCustomPhotoUriChange(selected.toString())
+                        }
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("YOUR BACKGROUND PHOTO", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Button(
+                                onClick = { photoPickerLauncher.launch(arrayOf("image/*")) },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = DeepMidnightPurple)
+                            ) {
+                                Icon(Icons.Default.UploadFile, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(if (customPhotoUri != null) "Change Photo" else "Upload Photo")
+                            }
+
+                            if (customPhotoUri != null) {
+                                Spacer(Modifier.width(12.dp))
+                                TextButton(onClick = { onCustomPhotoUriChange(null) }) {
+                                    Text("Remove", color = CoralAccent)
+                                }
+                            }
+                        }
+
+                        if (customPhotoUri != null) {
+                            Text("OVERLAY READABILITY DIM", color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                listOf(0.25f to "Light", 0.45f to "Medium", 0.65f to "Dark").forEach { (level, label) ->
+                                    val isDimSelected = abs(dimLevel - level) < 0.05f
+                                    Button(
+                                        onClick = { onDimLevelChange(level) },
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (isDimSelected) RichViolet else SurfaceBorder,
+                                            contentColor = if (isDimSelected) Color.White else TextPrimary
+                                        ),
+                                        modifier = Modifier.weight(1f).height(36.dp)
+                                    ) {
+                                        Text(label, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         item(key = "appearance-heading") {
             MindoraSectionHeading("Make Mindora yours", "Your appearance choice is saved on this device.")
         }
