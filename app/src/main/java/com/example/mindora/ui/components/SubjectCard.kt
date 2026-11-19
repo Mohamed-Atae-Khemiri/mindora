@@ -1,8 +1,6 @@
 package com.example.mindora.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -36,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mindora.ui.theme.AppSurface
 import com.example.mindora.ui.theme.ErrorRed
-import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextMuted
 import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextSecondary
@@ -58,25 +54,24 @@ fun SubjectCard(
         Color(0xFF7965E8)
     }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = MindoraFeatureShape,
-        colors = CardDefaults.cardColors(containerColor = AppSurface),
-        border = BorderStroke(1.dp, SurfaceBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ThreeDGlassCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        backgroundColor = AppSurface,
+        depthOffset = 5.dp,
+        borderColor = accentColor.copy(alpha = 0.4f),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, end = 12.dp, top = 12.dp, bottom = 14.dp),
+                .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 16.dp),
             verticalAlignment = Alignment.Top
         ) {
             Box(
                 Modifier
-                    .width(4.dp)
-                    .height(112.dp)
+                    .width(5.dp)
+                    .height(110.dp)
                     .clip(CircleShape)
                     .background(accentColor)
             )
@@ -88,8 +83,8 @@ fun SubjectCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.MenuBook, contentDescription = null, tint = accentColor, modifier = Modifier.size(17.dp))
-                        Spacer(Modifier.width(7.dp))
+                        Icon(Icons.Default.MenuBook, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text(
                             "COURSE",
                             color = TextMuted,
@@ -112,8 +107,8 @@ fun SubjectCard(
                     color = TextPrimary,
                     fontFamily = FontFamily.Serif,
                     fontSize = 24.sp,
-                    lineHeight = 29.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 28.sp,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -128,19 +123,18 @@ fun SubjectCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        if (taskCount == 1) "1 task connected" else "$taskCount tasks connected",
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
+                    ThreeDBadge(
+                        text = if (taskCount == 1) "1 task connected" else "$taskCount tasks connected",
+                        backgroundColor = accentColor.copy(alpha = 0.15f),
+                        textColor = accentColor
                     )
-                    Icon(Icons.Default.ArrowOutward, contentDescription = null, tint = accentColor, modifier = Modifier.size(17.dp))
+                    Icon(Icons.Default.ArrowOutward, contentDescription = null, tint = accentColor, modifier = Modifier.size(18.dp))
                 }
             }
         }

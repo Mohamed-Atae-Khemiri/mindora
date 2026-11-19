@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +18,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,24 +42,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mindora.data.entity.Subject
-import com.example.mindora.ui.components.MindoraFeatureShape
 import com.example.mindora.ui.components.MindoraPage
 import com.example.mindora.ui.components.MindoraSectionHeading
 import com.example.mindora.ui.components.PandaMood
 import com.example.mindora.ui.components.PandaStudyMascot
-import com.example.mindora.ui.components.MindoraSurfaceShape
 import com.example.mindora.ui.components.SubjectCard
-import com.example.mindora.ui.theme.AppSurface
+import com.example.mindora.ui.components.ThreeDBadge
+import com.example.mindora.ui.components.ThreeDButton
+import com.example.mindora.ui.components.ThreeDGlassCard
 import com.example.mindora.ui.theme.CoralAccent
 import com.example.mindora.ui.theme.DeepMidnightPurple
 import com.example.mindora.ui.theme.ElectricLavender
 import com.example.mindora.ui.theme.RichViolet
 import com.example.mindora.ui.theme.SubjectColorPresets
-import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextSecondary
 import com.example.mindora.viewmodel.SubjectViewModel
@@ -75,91 +74,103 @@ fun SubjectsScreen(viewModel: SubjectViewModel) {
         title = "Subjects",
         description = "A clear place for every class, idea and deadline.",
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            ThreeDButton(
                 onClick = { showAddDialog = true },
-                containerColor = DeepMidnightPurple,
-                contentColor = Color.White,
-                shape = MindoraFeatureShape
+                buttonColor = DeepMidnightPurple,
+                depthColor = Color(0xFF140F26),
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add subject")
-                Spacer(Modifier.width(8.dp))
-                Text("New subject", fontWeight = FontWeight.SemiBold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Add, contentDescription = "Add subject", tint = ElectricLavender)
+                    Spacer(Modifier.width(8.dp))
+                    Text("New subject", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                }
             }
         }
     ) {
         if (subjectsWithCount.isEmpty()) {
             item(key = "subjects-empty") {
-                Column(
+                ThreeDGlassCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 18.dp)
-                        .clip(MindoraFeatureShape)
-                        .background(AppSurface)
-                        .border(1.dp, SurfaceBorder, MindoraFeatureShape)
-                        .padding(horizontal = 28.dp, vertical = 34.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(top = 18.dp),
+                    depthOffset = 6.dp
                 ) {
-                    PandaStudyMascot(size = 82.dp, mood = PandaMood.STUDYING, animate = false)
-                    Spacer(Modifier.height(18.dp))
-                    Text(
-                        "Start with one class",
-                        color = TextPrimary,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(7.dp))
-                    Text(
-                        "Add a subject to group its assignments, homework and exams.",
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 28.dp, vertical = 34.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PandaStudyMascot(size = 82.dp, mood = PandaMood.STUDYING, animate = false)
+                        Spacer(Modifier.height(18.dp))
+                        Text(
+                            "Start with one class",
+                            color = TextPrimary,
+                            fontFamily = FontFamily.Serif,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(7.dp))
+                        Text(
+                            "Add a subject to group its assignments, homework and exams.",
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         } else {
             item(key = "subjects-overview") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MindoraSurfaceShape)
-                        .background(DeepMidnightPurple)
-                        .padding(horizontal = 20.dp, vertical = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                ThreeDGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = DeepMidnightPurple,
+                    depthColor = Color(0xFF140F26),
+                    depthOffset = 8.dp,
+                    glowColor = RichViolet
                 ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "IN YOUR ORBIT",
-                            color = ElectricLavender,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp
-                        )
-                        Spacer(Modifier.height(5.dp))
-                        Text(
-                            subjectsWithCount.size.toString().padStart(2, '0'),
-                            color = Color.White,
-                            fontSize = 38.sp,
-                            lineHeight = 42.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-1.5).sp
-                        )
-                        Text(
-                            if (subjectsWithCount.size == 1) "subject to explore" else "subjects to explore",
-                            color = Color.White.copy(alpha = .78f),
-                            fontSize = 13.sp
-                        )
-                    }
-                    Box(
-                        Modifier
-                            .size(54.dp)
-                            .clip(CircleShape)
-                            .background(CoralAccent),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 22.dp, vertical = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Book, contentDescription = null, tint = DeepMidnightPurple)
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "IN YOUR ORBIT",
+                                color = ElectricLavender,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.6.sp
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                subjectsWithCount.size.toString().padStart(2, '0'),
+                                color = Color.White,
+                                fontSize = 42.sp,
+                                lineHeight = 44.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = (-2).sp
+                            )
+                            Text(
+                                if (subjectsWithCount.size == 1) "subject to explore" else "subjects to explore",
+                                color = Color.White.copy(alpha = .78f),
+                                fontSize = 13.sp
+                            )
+                        }
+                        Box(
+                            Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(CoralAccent),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Book, contentDescription = null, tint = DeepMidnightPurple, modifier = Modifier.size(26.dp))
+                        }
                     }
                 }
             }
@@ -241,7 +252,7 @@ fun SubjectsScreen(viewModel: SubjectViewModel) {
     }
 }
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SubjectFormDialog(
     title: String,

@@ -1,5 +1,6 @@
 package com.example.mindora.ui.screens
 
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -66,6 +67,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mindora.data.entity.StudentProfile
+import com.example.mindora.notification.DailyMotivationReminders
 import com.example.mindora.ui.components.MindoraFeatureShape
 import com.example.mindora.ui.components.MindoraPage
 import com.example.mindora.ui.components.MindoraSectionHeading
@@ -124,8 +126,11 @@ fun SettingsScreen(
     var avatarPickerError by rememberSaveable { mutableStateOf<String?>(null) }
     var yearMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var selectedPatternCategory by rememberSaveable { mutableStateOf(PatternCategory.ALL) }
+    var motivationEnabled by rememberSaveable { mutableStateOf(DailyMotivationReminders.isEnabled(context)) }
+    var motivationTimes by rememberSaveable { mutableStateOf(listOf(0, 1, 2).map { DailyMotivationReminders.getMinutes(context, it) }) }
 
     LaunchedEffect(profile) {
+        DailyMotivationReminders.saveStudentName(context, profile?.fullName.orEmpty())
         fullName = profile?.fullName.orEmpty()
         email = profile?.email.orEmpty()
         phone = profile?.phoneNumber.orEmpty()
@@ -580,6 +585,49 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+        }
+
+        item(key = "motivation-reminders") {
+            Column(
+                Modifier.fillMaxWidth().clip(MindoraFeatureShape).background(AppSurface).padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MindoraSectionHeading("Daily Motivation Reminders", "Gentle prompts for your goals, study sessions, and daily progress.")
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Enable reminders", color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("Quiet hours: 9:00 PM–7:00 AM", color = TextSecondary, fontSize = 12.sp)
+                    }
+                    Switch(checked = motivationEnabled, onCheckedChange = { enabled ->
+                        motivationEnabled = enabled
+                        DailyMotivationReminders.setEnabled(context, enabled)
+                    })
+                }
+                listOf("Morning motivation", "Afternoon study reminder", "Evening progress check-in").forEachIndexed { slot, label ->
+                    Surface(
+                        onClick = {
+                            val current = motivationTimes[slot]
+                            TimePickerDialog(context, { _, hour, minute ->
+                                val chosen = hour * 60 + minute
+                                if (chosen / 60 in 7..20) {
+                                    val updated = motivationTimes.toMutableList().also { it[slot] = chosen }
+                                    motivationTimes = updated
+                                    DailyMotivationReminders.saveTime(context, slot, chosen)
+                                }
+                            }, current / 60, current % 60, false).show()
+                        },
+                        enabled = motivationEnabled,
+                        shape = RoundedCornerShape(14.dp),
+                        color = SurfaceBorder
+                    ) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(label, Modifier.weight(1f), color = TextPrimary, fontSize = 13.sp)
+                            Text(String.format(java.util.Locale.getDefault(), "%02d:%02d", motivationTimes[slot] / 60, motivationTimes[slot] % 60), color = RichViolet, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+                Text("Choose times between 7:00 AM and 8:59 PM. Reminders use battery-friendly daily scheduling.", color = TextSecondary, fontSize = 12.sp)
             }
         }
 

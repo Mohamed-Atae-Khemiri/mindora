@@ -2,11 +2,9 @@ package com.example.mindora.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,13 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -31,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +39,11 @@ import com.example.mindora.ui.theme.AppSurface
 import com.example.mindora.ui.theme.ErrorRed
 import com.example.mindora.ui.theme.PrimaryPurple
 import com.example.mindora.ui.theme.PrimaryPurpleLight
-import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextMuted
 import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextSecondary
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TaskCard(
     title: String,
@@ -71,20 +65,20 @@ fun TaskCard(
         PrimaryPurple
     }
     val cardBgColor by animateColorAsState(
-        targetValue = if (isCompleted) AppSurface.copy(alpha = .68f) else AppSurface,
+        targetValue = if (isCompleted) AppSurface.copy(alpha = .78f) else AppSurface,
         label = "TaskCardBg"
     )
 
-    Card(
+    ThreeDGlassCard(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
-        shape = MindoraFeatureShape,
-        colors = CardDefaults.cardColors(containerColor = cardBgColor),
-        border = BorderStroke(1.dp, SurfaceBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = RoundedCornerShape(24.dp),
+        backgroundColor = cardBgColor,
+        depthOffset = if (isCompleted) 2.dp else 5.dp,
+        borderColor = if (isCompleted) Color(0x33B8A8FF) else subjectColor.copy(alpha = 0.35f)
     ) {
-        Column(Modifier.padding(start = 16.dp, end = 12.dp, top = 13.dp, bottom = 14.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -108,7 +102,7 @@ fun TaskCard(
                         fontFamily = FontFamily.Serif,
                         fontSize = 18.sp,
                         lineHeight = 22.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = if (isCompleted) TextMuted else TextPrimary,
                         textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                         maxLines = 2,
@@ -134,21 +128,29 @@ fun TaskCard(
                 }
             }
 
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(10.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (subjectName.isNotBlank()) {
-                    MetadataPill(label = subjectName, foreground = subjectColor, background = subjectColor.copy(alpha = .12f), showDot = true)
+                    ThreeDBadge(
+                        text = subjectName,
+                        backgroundColor = subjectColor.copy(alpha = 0.15f),
+                        textColor = subjectColor
+                    )
                 }
-                MetadataPill(label = taskType.lowercase().replaceFirstChar { it.uppercase() }, foreground = PrimaryPurple, background = PrimaryPurpleLight)
+                ThreeDBadge(
+                    text = taskType.lowercase().replaceFirstChar { it.uppercase() },
+                    backgroundColor = PrimaryPurpleLight,
+                    textColor = PrimaryPurple
+                )
                 PriorityBadge(priorityLabel = priorityLabel)
             }
 
             if (deadlineDate.isNotBlank()) {
-                Spacer(Modifier.height(11.dp))
+                Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.CalendarToday,
@@ -157,31 +159,9 @@ fun TaskCard(
                         modifier = Modifier.size(15.dp)
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("Due $deadlineDate", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextSecondary)
+                    Text("Due $deadlineDate", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextSecondary)
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MetadataPill(
-    label: String,
-    foreground: Color,
-    background: Color,
-    showDot: Boolean = false
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(background)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
-    ) {
-        if (showDot) {
-            Box(Modifier.size(6.dp).clip(CircleShape).background(foreground))
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(label, color = foreground, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,9 +29,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,12 +48,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mindora.data.entity.StudyGoal
-import com.example.mindora.ui.components.MindoraFeatureShape
 import com.example.mindora.ui.components.MindoraPage
 import com.example.mindora.ui.components.MindoraSectionHeading
 import com.example.mindora.ui.components.PandaMood
 import com.example.mindora.ui.components.PandaStudyMascot
-import com.example.mindora.ui.components.MindoraSurfaceShape
+import com.example.mindora.ui.components.ThreeDBadge
+import com.example.mindora.ui.components.ThreeDButton
+import com.example.mindora.ui.components.ThreeDGlassCard
+import com.example.mindora.ui.components.ThreeDProgressGauge
 import com.example.mindora.ui.theme.AppSurface
 import com.example.mindora.ui.theme.CoralAccent
 import com.example.mindora.ui.theme.DeepMidnightPurple
@@ -79,84 +80,75 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
         title = "Progress",
         description = "Notice the work you have already put in.",
         headerAction = {
-            Box(
-                Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(LimeAccent),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.EmojiEvents, contentDescription = "Your progress", tint = DeepMidnightPurple)
-            }
+            ThreeDBadge(
+                text = "TRACKER",
+                backgroundColor = LimeAccent,
+                textColor = DeepMidnightPurple,
+                icon = Icons.Default.EmojiEvents
+            )
         }
     ) {
         item(key = "progress-feature") {
             val percentage = state.completionPercentage.coerceIn(0f, 1f)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MindoraFeatureShape)
-                    .background(DeepMidnightPurple)
-                    .padding(horizontal = 22.dp, vertical = 22.dp)
+            ThreeDGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = DeepMidnightPurple,
+                depthColor = Color(0xFF140F26),
+                depthOffset = 8.dp,
+                glowColor = RichViolet
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "THE LONG GAME",
-                            color = ElectricLavender,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.7.sp
-                        )
-                        Spacer(Modifier.height(7.dp))
-                        Text(
-                            "${(percentage * 100).toInt()}%",
-                            color = Color.White,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 54.sp,
-                            lineHeight = 58.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-1.5).sp
-                        )
-                        Text(
-                            "of your tasks are complete",
-                            color = Color.White.copy(alpha = .78f),
-                            fontSize = 14.sp
-                        )
-                    }
-                    Box(
-                        Modifier
-                            .padding(top = 4.dp)
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(CoralAccent),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = DeepMidnightPurple)
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
-                LinearProgressIndicator(
-                    progress = { percentage },
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(CircleShape),
-                    color = LimeAccent,
-                    trackColor = Color.White.copy(alpha = .2f)
-                )
-                Spacer(Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = 22.dp, vertical = 22.dp)
                 ) {
-                    ProgressMetric("TOTAL", state.totalTasks.toString(), Modifier.weight(1f))
-                    ProgressMetric("DONE", state.completedTasks.toString(), Modifier.weight(1f))
-                    ProgressMetric("TO GO", state.pendingTasks.toString(), Modifier.weight(1f))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "THE LONG GAME",
+                                color = ElectricLavender,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.7.sp
+                            )
+                            Spacer(Modifier.height(7.dp))
+                            Text(
+                                "${(percentage * 100).toInt()}%",
+                                color = Color.White,
+                                fontFamily = FontFamily.Serif,
+                                fontSize = 54.sp,
+                                lineHeight = 58.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = (-1.5).sp
+                            )
+                            Text(
+                                "of your tasks are complete",
+                                color = Color.White.copy(alpha = .78f),
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        ThreeDProgressGauge(
+                            progress = percentage,
+                            size = 96.dp,
+                            strokeWidth = 11.dp
+                        )
+                    }
+
+                    Spacer(Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ProgressMetric("TOTAL", state.totalTasks.toString(), Modifier.weight(1f))
+                        ProgressMetric("DONE", state.completedTasks.toString(), Modifier.weight(1f))
+                        ProgressMetric("TO GO", state.pendingTasks.toString(), Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -172,57 +164,64 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
                     detail = "Small promises, kept consistently.",
                     modifier = Modifier.weight(1f)
                 )
-                OutlinedButton(
+                ThreeDButton(
                     onClick = { showAddGoalDialog = true },
-                    shape = RoundedCornerShape(14.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder)
+                    buttonColor = DeepMidnightPurple,
+                    depthColor = Color(0xFF140F26),
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(5.dp))
-                    Text("New")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = ElectricLavender)
+                        Spacer(Modifier.width(4.dp))
+                        Text("New", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
 
         if (state.studyGoals.isEmpty()) {
             item(key = "goals-empty") {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MindoraSurfaceShape)
-                        .background(AppSurface)
-                        .padding(horizontal = 24.dp, vertical = 26.dp),
-                    horizontalAlignment = Alignment.Start
+                ThreeDGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    depthOffset = 5.dp
                 ) {
-                    PandaStudyMascot(
-                        size = 76.dp,
-                        mood = PandaMood.STUDYING,
-                        animate = false
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        "MAKE IT YOURS",
-                        color = RichViolet,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.6.sp
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        "Choose one thing to practice this week.",
-                        color = TextPrimary,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 22.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        "Set a study target, then check in as you go.",
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 26.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        PandaStudyMascot(
+                            size = 76.dp,
+                            mood = PandaMood.STUDYING,
+                            animate = false
+                        )
+                        Spacer(Modifier.height(14.dp))
+                        Text(
+                            "MAKE IT YOURS",
+                            color = RichViolet,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.6.sp
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            "Choose one thing to practice this week.",
+                            color = TextPrimary,
+                            fontFamily = FontFamily.Serif,
+                            fontSize = 22.sp,
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Set a study target, then check in as you go.",
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp
+                        )
+                    }
                 }
             }
         } else {
@@ -275,9 +274,9 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
 @Composable
 private fun ProgressMetric(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier) {
-        Text(label, color = ElectricLavender, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+        Text(label, color = ElectricLavender, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 1.2.sp)
         Spacer(Modifier.height(4.dp))
-        Text(value, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+        Text(value, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Black)
     }
 }
 
@@ -292,11 +291,11 @@ fun GoalCard(
     val progressFraction = if (goal.target > 0) goal.completed.toFloat() / goal.target else 0f
     val completed = goal.target > 0 && goal.completed >= goal.target
 
-    Surface(
+    ThreeDGlassCard(
         modifier = modifier.fillMaxWidth(),
-        shape = MindoraSurfaceShape,
-        color = AppSurface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder)
+        shape = RoundedCornerShape(22.dp),
+        backgroundColor = AppSurface,
+        depthOffset = 4.dp
     ) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
             Row(
@@ -319,7 +318,7 @@ fun GoalCard(
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(goal.title, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    Text(goal.title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(Modifier.height(3.dp))
                     Text(
                         "${goal.completed} of ${goal.target} completed",
@@ -354,7 +353,7 @@ fun GoalCard(
                     "${goal.completed} / ${goal.target}",
                     color = TextPrimary,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onIncrement, enabled = goal.completed < goal.target) {
                     Icon(Icons.Default.Add, contentDescription = "Increase progress", tint = RichViolet)

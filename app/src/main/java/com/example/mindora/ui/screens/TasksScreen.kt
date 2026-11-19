@@ -1,10 +1,10 @@
 package com.example.mindora.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,7 +28,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -45,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -56,23 +53,22 @@ import androidx.compose.ui.unit.sp
 import com.example.mindora.data.entity.Subject
 import com.example.mindora.data.entity.Task
 import com.example.mindora.data.entity.TaskWithSubject
-import com.example.mindora.ui.components.MindoraFeatureShape
 import com.example.mindora.ui.components.MindoraPage
 import com.example.mindora.ui.components.MindoraSectionHeading
 import com.example.mindora.ui.components.PandaMood
 import com.example.mindora.ui.components.PandaStudyMascot
-import com.example.mindora.ui.components.MindoraSurfaceShape
 import com.example.mindora.ui.components.TaskCard
+import com.example.mindora.ui.components.ThreeDBadge
+import com.example.mindora.ui.components.ThreeDButton
+import com.example.mindora.ui.components.ThreeDGlassCard
 import com.example.mindora.ui.theme.AppSurface
 import com.example.mindora.ui.theme.CoralAccent
 import com.example.mindora.ui.theme.DeepMidnightPurple
 import com.example.mindora.ui.theme.ElectricLavender
-import com.example.mindora.ui.theme.ErrorRed
 import com.example.mindora.ui.theme.RichViolet
 import com.example.mindora.ui.theme.SurfaceBorder
 import com.example.mindora.ui.theme.TextPrimary
 import com.example.mindora.ui.theme.TextSecondary
-
 import com.example.mindora.viewmodel.TaskFilter
 import com.example.mindora.viewmodel.TaskViewModel
 import java.text.SimpleDateFormat
@@ -80,7 +76,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TasksScreen(viewModel: TaskViewModel) {
     val tasksWithSubject by viewModel.tasksWithSubject.collectAsState()
@@ -96,15 +92,18 @@ fun TasksScreen(viewModel: TaskViewModel) {
         title = "Tasks & exams",
         description = "A calm plan for the work that moves you forward.",
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            ThreeDButton(
                 onClick = { showAddDialog = true },
-                containerColor = DeepMidnightPurple,
-                contentColor = Color.White,
-                shape = MindoraFeatureShape
+                buttonColor = DeepMidnightPurple,
+                depthColor = Color(0xFF140F26),
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add task")
-                Spacer(Modifier.width(8.dp))
-                Text("New task", fontWeight = FontWeight.SemiBold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Add, contentDescription = "Add task", tint = ElectricLavender)
+                    Spacer(Modifier.width(8.dp))
+                    Text("New task", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                }
             }
         }
     ) {
@@ -123,7 +122,7 @@ fun TasksScreen(viewModel: TaskViewModel) {
                             Text(
                                 filter.displayName,
                                 color = if (selected) Color.White else TextSecondary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                         },
                         leadingIcon = if (selected) {
@@ -142,52 +141,55 @@ fun TasksScreen(viewModel: TaskViewModel) {
                             borderColor = SurfaceBorder,
                             selectedBorderColor = DeepMidnightPurple
                         ),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(16.dp)
                     )
                 }
             }
         }
 
         item(key = "task-count") {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MindoraSurfaceShape)
-                    .background(DeepMidnightPurple)
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically
+            ThreeDGlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = DeepMidnightPurple,
+                depthColor = Color(0xFF140F26),
+                depthOffset = 8.dp,
+                glowColor = RichViolet
             ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        selectedFilter.displayName.uppercase(),
-                        color = ElectricLavender,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
-                    )
-                    Spacer(Modifier.height(5.dp))
-                    Text(
-                        tasksWithSubject.size.toString().padStart(2, '0'),
-                        color = Color.White,
-                        fontSize = 38.sp,
-                        lineHeight = 42.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-1.5).sp
-                    )
-                    Text(
-                        if (tasksWithSubject.size == 1) "task in this view" else "tasks in this view",
-                        color = Color.White.copy(alpha = .78f),
-                        fontSize = 13.sp
-                    )
-                }
-                Box(
-                    Modifier
-                        .size(54.dp)
-                        .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 4.dp))
-                        .background(CoralAccent),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 22.dp, vertical = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = DeepMidnightPurple)
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            selectedFilter.displayName.uppercase(),
+                            color = ElectricLavender,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.6.sp
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            tasksWithSubject.size.toString().padStart(2, '0'),
+                            color = Color.White,
+                            fontSize = 42.sp,
+                            lineHeight = 44.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-2).sp
+                        )
+                        Text(
+                            if (tasksWithSubject.size == 1) "task in this view" else "tasks in this view",
+                            color = Color.White.copy(alpha = .78f),
+                            fontSize = 13.sp
+                        )
+                    }
+                    ThreeDBadge(
+                        text = "TASK VIEW",
+                        backgroundColor = CoralAccent,
+                        textColor = DeepMidnightPurple,
+                        icon = Icons.Default.CalendarMonth
+                    )
                 }
             }
         }
@@ -205,31 +207,34 @@ fun TasksScreen(viewModel: TaskViewModel) {
 
         if (tasksWithSubject.isEmpty()) {
             item(key = "tasks-empty") {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MindoraFeatureShape)
-                        .background(AppSurface)
-                        .padding(horizontal = 26.dp, vertical = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                ThreeDGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    depthOffset = 5.dp
                 ) {
-                    PandaStudyMascot(size = 78.dp, mood = PandaMood.SLEEPING, animate = false)
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        "Nothing here just yet",
-                        color = TextPrimary,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        "Your next step can start with one small task.",
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 26.dp, vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PandaStudyMascot(size = 78.dp, mood = PandaMood.SLEEPING, animate = false)
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "Nothing here just yet",
+                            color = TextPrimary,
+                            fontFamily = FontFamily.Serif,
+                            fontSize = 23.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Your next step can start with one small task.",
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         } else {
@@ -328,7 +333,7 @@ fun TasksScreen(viewModel: TaskViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TaskFormDialog(
     title: String,

@@ -12,7 +12,11 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == "android.intent.action.QUICKBOOT_POWERON") {
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == "android.intent.action.QUICKBOOT_POWERON" ||
+            intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
+            intent.action == Intent.ACTION_MY_PACKAGE_REPLACED
+        ) {
+            DailyMotivationReminders.rescheduleAll(context)
             CoroutineScope(Dispatchers.IO).launch {
                 val db = MindoraDatabase.getDatabase(context)
                 val studyActivityRepository = StudyActivityRepository(db.studyActivityDao())

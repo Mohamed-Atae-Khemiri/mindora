@@ -5,8 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.mindora.ai.ui.LocalAiScreen
-import com.example.mindora.ai.viewmodel.LocalAiViewModel
+import com.example.mindora.ai.ui.AiScreen
+import com.example.mindora.ai.viewmodel.AiViewModel
 import com.example.mindora.ui.screens.HomeScreen
 import com.example.mindora.ui.screens.ProgressScreen
 import com.example.mindora.ui.screens.SettingsScreen
@@ -27,7 +27,7 @@ fun MindoraAppNavHost(
     taskViewModel: TaskViewModel,
     progressViewModel: ProgressViewModel,
     studentProfileViewModel: StudentProfileViewModel,
-    localAiViewModel: LocalAiViewModel,
+    aiViewModel: AiViewModel,
     isDarkMode: Boolean,
     onDarkModeChange: (Boolean) -> Unit,
     backgroundMode: BackgroundMode,
@@ -62,7 +62,7 @@ fun MindoraAppNavHost(
             ProgressScreen(viewModel = progressViewModel)
         }
         composable(NavScreen.Assistant.route) {
-            LocalAiScreen(viewModel = localAiViewModel)
+            AiScreen(viewModel = aiViewModel)
         }
         composable(NavScreen.Settings.route) {
             SettingsScreen(
