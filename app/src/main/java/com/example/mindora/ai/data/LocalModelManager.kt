@@ -29,12 +29,8 @@ class LocalModelManager(context: Context) {
         uri: Uri,
         onProgress: (Float?) -> Unit
     ): File = withContext(Dispatchers.IO) {
-        val sourceName = queryDisplayName(resolver, uri)
-            ?: uri.lastPathSegment.orEmpty().substringAfterLast('/')
-        require(sourceName == MODEL_FILE_NAME) {
-            "Choose the official $MODEL_FILE_NAME file."
-        }
-
+        // The file name is not checked on purpose: Android file pickers often hide or rename it.
+        // The size check and the SHA-256 check below confirm that this is the right model.
         val expectedLength = querySize(resolver, uri)
         if (expectedLength != null && expectedLength < MIN_MODEL_BYTES) {
             throw IOException("The selected file is too small to be Qwen3-0.6B.")
@@ -123,12 +119,6 @@ class LocalModelManager(context: Context) {
             )
         }
     }
-
-    private fun queryDisplayName(resolver: ContentResolver, uri: Uri): String? =
-        resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-            val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (index >= 0 && cursor.moveToFirst()) cursor.getString(index) else null
-        }
 
     private fun querySize(resolver: ContentResolver, uri: Uri): Long? =
         resolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
